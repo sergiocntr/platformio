@@ -17,7 +17,7 @@ const char* mqttID;
 const char* remote_host = "www.google.com";
 uint8_t mqtt_reconnect_tries = 0;
 unsigned long wifi_reconnect_time;
-unsigned long wifi_check_time = 60000;
+unsigned long wifi_check_time = 15000;
 uint8_t checkForUpdates(uint16_t FW_VERSION) {
   //Serial.println( "Checking for firmware updates." );
   //Serial.print( "Current firmware version: " );
@@ -47,7 +47,7 @@ fwImageURL.concat( "/firmware.bin" );
       t_httpUpdate_return ret = ESPhttpUpdate.update(myUpdateConn , fwImageURL );
       switch(ret) {
         case HTTP_UPDATE_FAILED:
-          check=1; 
+          check=1;
           //Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
           break;
 

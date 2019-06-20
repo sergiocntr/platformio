@@ -1,5 +1,6 @@
 #ifndef myFunctions_h
 #define myFunctions_h
+#include "pitches.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266Ping.h>
 #include <PubSubClient.h>
@@ -18,6 +19,7 @@ const char* remote_host = "www.google.com";
 uint8_t mqtt_reconnect_tries = 0;
 unsigned long wifi_reconnect_time;
 unsigned long wifi_check_time = 15000;
+
 uint8_t checkForUpdates(uint16_t FW_VERSION) {
   //Serial.println( "Checking for firmware updates." );
   //Serial.print( "Current firmware version: " );
@@ -149,18 +151,22 @@ void setIP(IPAddress myIP,const char* mymqID){
   mqttID=mymqID;
 }
 uint8_t connectWiFi(){
+  //Serial.print( "dentro conn wifi " );
   delay(100);
   if(WiFi.status() == WL_CONNECTED) return 0;
+  //Serial.println( "0" );
   WiFi.mode(WIFI_STA);
   WiFi.forceSleepWake();
   delay(10);
+  //Serial.println( "1" );
   WiFi.config(ip, gateway, subnet,dns1); // Set static IP (2,7s) or 8.6s with DHCP  + 2s on battery
   delay(10);
   WiFi.begin(ssid, password);
   unsigned long wifi_initiate = millis();
+  //Serial.println( "2" );
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     if ((millis() - wifi_initiate) > 5000L) {
-      //DDEBUG_PRINT("conn LAN FAIL! ");
+      //Serial.println( "3" );
       wifi_set_sleep_type(LIGHT_SLEEP_T);
       WiFi.mode(WIFI_OFF); //energy saving mode if local WIFI isn't connected
       WiFi.forceSleepBegin();
@@ -170,15 +176,17 @@ uint8_t connectWiFi(){
     delay(500);
 
   }
+  //Serial.println( "4" );
   wifi_initiate = millis();
-  //while (!c.connect("www.google.com", 80 )) {
-  while(!Ping.ping(remote_host)){
+  while (!c.connect("www.google.com", 80 )) {
+  //while(!Ping.ping(remote_host)){
     if (millis() - wifi_initiate > 5000L) {
-      //DDEBUG_PRINT("conn internet FAIL! ");
+      //Serial.println( "5" );
       return  2;
     }
     delay(500);
   }
+  //Serial.println( "6" );
   return 0;
 }
 #endif

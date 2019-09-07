@@ -10,6 +10,7 @@
 #include <topic.h>
 #include <myIP.h>
 #include "password.h"
+
 //HTTPClient http;
 WiFiClient c;
 PubSubClient client(c);
@@ -17,8 +18,8 @@ IPAddress ip;
 const char* mqttID;
 const char* remote_host = "www.google.com";
 uint8_t mqtt_reconnect_tries = 0;
-unsigned long wifi_reconnect_time;
-unsigned long wifi_check_time = 15000;
+uint32_t wifi_reconnect_time;
+uint32_t wifi_check_time = 15000;
 
 uint8_t checkForUpdates(uint16_t FW_VERSION) {
   //Serial.println( "Checking for firmware updates." );
@@ -77,21 +78,17 @@ fwImageURL.concat( "/firmware.bin" );
   return check;
 }
 int8_t connectMQTT(){
-  if(client.state()==0){
-    //DDEBUG_PRINT("MQTT_ALREADY_CONNECTED");
-    return 0;
-  }
+  if(client.connected()) return 0;
   unsigned long wifi_initiate = millis();
   String clientId = String(mqttID);
   clientId += String(random(0xffff), HEX);
   yield();
   while ((!client.connected()) && ((millis() - wifi_initiate) < 3000)){
-    client.connect(clientId.c_str(),mqttUser,mqttPass);
+  client.connect(clientId.c_str(),mqttUser,mqttPass);
     while((millis() - wifi_initiate) < 900){
       client.loop();
-      delay(100);
+      delay(1000);
     }
-
   }
   return client.state();
   //return client.state();
@@ -148,9 +145,11 @@ int send(const char* topic, const char* message){
 }
 void setIP(IPAddress myIP,const char* mymqID){
   ip=myIP;
+  delay(100);
   mqttID=mymqID;
+  delay(100);
 }
-uint8_t connectWiFi(){
+int8_t connectWiFi(){
   //Serial.print( "dentro conn wifi " );
   delay(100);
   if(WiFi.status() == WL_CONNECTED) return 0;
@@ -162,7 +161,7 @@ uint8_t connectWiFi(){
   WiFi.config(ip, gateway, subnet,dns1); // Set static IP (2,7s) or 8.6s with DHCP  + 2s on battery
   delay(10);
   WiFi.begin(ssid, password);
-  unsigned long wifi_initiate = millis();
+  uint32_t wifi_initiate = millis();
   //Serial.println( "2" );
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     if ((millis() - wifi_initiate) > 5000L) {
@@ -174,7 +173,6 @@ uint8_t connectWiFi(){
       return 1;
     }
     delay(500);
-
   }
   //Serial.println( "4" );
   wifi_initiate = millis();
@@ -186,7 +184,7 @@ uint8_t connectWiFi(){
     }
     delay(500);
   }
-  //Serial.println( "6" );
+  
   return 0;
 }
 #endif

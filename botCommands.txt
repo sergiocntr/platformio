@@ -1,0 +1,4 @@
+spegni - Spegni Pi
+eneoff - Stacca corrente
+acquasi - Acqua Calda Si
+acquano - Acqua Calda No
